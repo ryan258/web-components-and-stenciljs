@@ -232,3 +232,60 @@ it would be nice if you didn't have to declare styles line by line in JS and cou
 
 well there is! welcome to the shadow dom!
 both will help us ensure we write nice reusable encapsulated custom web components!
+
+## Using the Shadow DOM
+
+Currently everything up to this point has been using the **light DOM**
+
+But what if everything that was going on was hidden away behind the custom component tag and not added to the normal DOM?
+
+We can give our component its own DOM tree that isn't effected by the normal DOM tree.
+
+That's the **Shadow DOM**
+
+Our element has its own DOM behind it, which makes up what we see on the page, but not directly connected to the real DOM, not effected by global styles, and vice-versa.
+
+1.) Unlock the shadow DOM in the constructor
+
+```js
+// defines whether you can access your shadow DOM tree from outside this component or not
+// - typically you won't close it
+this.attachShadow({ mode: 'open' })
+```
+
+2.) Append elements to the shadowDOM
+
+```js
+// this.appendChild(tooltipIcon)
+this.shadowRoot.appendChild(tooltipIcon)
+// now it's appending to the shadow tree
+```
+
+But the text that is wrapped by this custom element is gone now!
+
+Well... now it's in the shadow DOM... and is detached from the main DOM. Along with that colored border we added in the style tag of the html page.
+
+To bring it back, we're going to need templates.
+
+## Use Templates
+
+Two ways:
+
+1. Use the <template> element
+
+- built into and understood by the browser
+- but not understood automatically
+- it becomes a blueprint for the html content that makes up our custom element
+
+```html
+<template id="tooltip-template">
+  <span> (?)</span>
+</template>
+```
+
+...
+
+but there are draw backs to this approach
+
+- it requires that content to be added to our html file
+- but we just want to use the web component

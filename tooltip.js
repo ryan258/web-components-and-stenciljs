@@ -3,6 +3,13 @@ class Tooltip extends HTMLElement {
     super()
     this._tooltipContainer
     this._tooltipText = 'Some default tooltipText'
+    // defines whether you can access your shadow DOM tree from outside this component or not
+    // - typically you won't close it
+    this.attachShadow({ mode: 'open' })
+    // reference template
+    const template = document.querySelector('#tooltip-template')
+    // you can access the shadow dom because it exists before it's rendered to the real dom, it's abstracted away
+    this.shadowRoot.appendChild(template.content.cloneNode(true)) // deep(true) or shallow(false)
   }
 
   connectedCallback() {
@@ -10,12 +17,15 @@ class Tooltip extends HTMLElement {
       this._tooltipText = this.getAttribute('text')
     }
 
-    const tooltipIcon = document.createElement('span')
-    tooltipIcon.textContent = ' (?)'
+    // const tooltipIcon = document.createElement('span')
+    // tooltipIcon.textContent = ' (?)'
+    const tooltipIcon = this.shadowRoot.querySelector('span')
     tooltipIcon.addEventListener('mouseenter', this._showTooltip.bind(this))
     tooltipIcon.addEventListener('mouseleave', this._hideTooltip.bind(this))
 
-    this.appendChild(tooltipIcon)
+    // this.appendChild(tooltipIcon)
+    this.shadowRoot.appendChild(tooltipIcon)
+    // now it's appending to the shadow tree
 
     // add styles - to the t5e-tooltip el itself
     this.style.position = 'relative'
@@ -30,11 +40,11 @@ class Tooltip extends HTMLElement {
     this._tooltipContainer.style.position = 'absolute'
     this._tooltipContainer.style.zIndex = '10'
 
-    this.appendChild(this._tooltipContainer)
+    this.shadowRoot.appendChild(this._tooltipContainer)
   }
 
   _hideTooltip() {
-    this.removeChild(this._tooltipContainer)
+    this.shadowRoot.removeChild(this._tooltipContainer)
   }
 }
 
