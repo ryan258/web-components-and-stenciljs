@@ -176,3 +176,59 @@ and use the text attribute in the html
 <p><t5e-tooltip text="Web components are a set of standards that allow you to create custom elements from existing elements. 🔥">Web components</t5e-tooltip> rock!</p>
 <t5e-tooltip>Another web component! 👻</t5e-tooltip>
 ```
+
+## Styling
+
+- you could set up general styles
+- or we could access the style attribute and add styles step by step (which every dom node has in JS)
+
+- global styles could effect elements in your custom element **and you generally don't want that!** and vice-versa
+
+```js
+class Tooltip extends HTMLElement {
+  constructor() {
+    super()
+    this._tooltipContainer
+    this._tooltipText = 'Some default tooltipText'
+  }
+
+  connectedCallback() {
+    if (this.hasAttribute('text')) {
+      this._tooltipText = this.getAttribute('text')
+    }
+
+    const tooltipIcon = document.createElement('span')
+    tooltipIcon.textContent = ' (?)'
+    tooltipIcon.addEventListener('mouseenter', this._showTooltip.bind(this))
+    tooltipIcon.addEventListener('mouseleave', this._hideTooltip.bind(this))
+
+    this.appendChild(tooltipIcon)
+
+    // add styles - to the t5e-tooltip el itself
+    this.style.position = 'relative'
+  }
+
+  _showTooltip() {
+    this._tooltipContainer = document.createElement('div')
+    this._tooltipContainer.textContent = this._tooltipText
+    // add styles
+    this._tooltipContainer.style.backgroundColor = 'black'
+    this._tooltipContainer.style.color = 'white'
+    this._tooltipContainer.style.position = 'absolute'
+    this._tooltipContainer.style.zIndex = '10'
+
+    this.appendChild(this._tooltipContainer)
+  }
+
+  _hideTooltip() {
+    this.removeChild(this._tooltipContainer)
+  }
+}
+
+customElements.define('t5e-tooltip', Tooltip)
+```
+
+it would be nice if you didn't have to declare styles line by line in JS and could template out the html
+
+well there is! welcome to the shadow dom!
+both will help us ensure we write nice reusable encapsulated custom web components!
