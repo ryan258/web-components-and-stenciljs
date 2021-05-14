@@ -123,3 +123,56 @@ class Tooltip extends HTMLElement {
 
 customElements.define('t5e-tooltip', Tooltip)
 ```
+
+## Using Attributes on Custom Els
+
+Makes it possible to set things from the outside.
+
+Attributes make it so you can configure your el in a declarative way.
+
+```js
+class Tooltip extends HTMLElement {
+  constructor() {
+    super()
+    this._tooltipContainer
+    // set default tooltipText
+    this._tooltipText = 'Some default tooltipText'
+  }
+
+  connectedCallback() {
+    // if check that overrides the default tooltopText if attribute exists
+    if (this.hasAttribute('text')) {
+      // init a property for the component's attribute
+      // - and get the name of the attr you want the value of
+      this._tooltipText = this.getAttribute('text')
+    }
+
+    const tooltipIcon = document.createElement('span')
+    tooltipIcon.textContent = ' (?)'
+    tooltipIcon.addEventListener('mouseenter', this._showTooltip.bind(this))
+    tooltipIcon.addEventListener('mouseleave', this._hideTooltip.bind(this))
+
+    this.appendChild(tooltipIcon)
+  }
+
+  _showTooltip() {
+    this._tooltipContainer = document.createElement('div')
+    // update to show the text attr's value
+    this._tooltipContainer.textContent = this._tooltipText
+    this.appendChild(this._tooltipContainer)
+  }
+
+  _hideTooltip() {
+    this.removeChild(this._tooltipContainer)
+  }
+}
+
+customElements.define('t5e-tooltip', Tooltip)
+```
+
+and use the text attribute in the html
+
+```html
+<p><t5e-tooltip text="Web components are a set of standards that allow you to create custom elements from existing elements. 🔥">Web components</t5e-tooltip> rock!</p>
+<t5e-tooltip>Another web component! 👻</t5e-tooltip>
+```
