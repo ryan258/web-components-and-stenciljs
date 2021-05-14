@@ -9,7 +9,14 @@ class Tooltip extends HTMLElement {
     // reference template
     const template = document.querySelector('#tooltip-template')
     // you can access the shadow dom because it exists before it's rendered to the real dom, it's abstracted away
-    this.shadowRoot.appendChild(template.content.cloneNode(true)) // deep(true) or shallow(false)
+    //! instead of vv
+    // this.shadowRoot.appendChild(template.content.cloneNode(true)) // deep(true) or shallow(false)
+    //! we can just define our template vv here
+    this.shadowRoot.innerHTML = `
+      <slot>some default</slot>
+      <span> (?)</span>
+    `
+    // ^^ innerHTML is just a property of an object so it doesn't need to render first, unlike appendChild() where it has to be in the DOM - innerHTML just prepares the object for being rendered to the DOM
   }
 
   connectedCallback() {

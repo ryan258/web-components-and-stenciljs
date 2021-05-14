@@ -289,3 +289,93 @@ but there are draw backs to this approach
 
 - it requires that content to be added to our html file
 - but we just want to use the web component
+
+## Slots
+
+Enables us to pass some content between the opening/closing tags of the custom element/web component.
+
+We use the <slot> element.
+
+With just that you get the child content back.
+
+<slot> means "here is a place for whatever you pass btw the tags and there we have our own DOM"
+
+- slots can also have a default value and will kick in if we don't pass anything btw the o/c tags
+
+```html
+<template id="tooltip-template"> <slot>some default</slot><span> (?)</span> </template>
+```
+
+## Defining the Template in JS
+
+Get the template out of the DOM
+
+- it would make it fully reusable so in the end all we would need to do is dump the JS file into any project and we're good to go!
+
+```js
+class Tooltip extends HTMLElement {
+  constructor() {
+    super()
+    this._tooltipContainer
+    this._tooltipText = 'Some default tooltipText'
+    // defines whether you can access your shadow DOM tree from outside this component or not
+    // - typically you won't close it
+    this.attachShadow({ mode: 'open' })
+    // reference template
+    const template = document.querySelector('#tooltip-template')
+    // you can access the shadow dom because it exists before it's rendered to the real dom, it's abstracted away
+    //! instead of vv
+    // this.shadowRoot.appendChild(template.content.cloneNode(true)) // deep(true) or shallow(false)
+    //! we can just define our template vv here
+    this.shadowRoot.innerHTML = `
+      <slot>some default</slot>
+      <span> (?)</span>
+    `
+    // ^^ innerHTML is just a property of an object so it doesn't need to render first, unlike appendChild() where it has to be in the DOM - innerHTML just prepares the object for being rendered to the DOM
+  }
+
+  connectedCallback() {
+    if (this.hasAttribute('text')) {
+      this._tooltipText = this.getAttribute('text')
+    }
+
+    // const tooltipIcon = document.createElement('span')
+    // tooltipIcon.textContent = ' (?)'
+    const tooltipIcon = this.shadowRoot.querySelector('span')
+    tooltipIcon.addEventListener('mouseenter', this._showTooltip.bind(this))
+    tooltipIcon.addEventListener('mouseleave', this._hideTooltip.bind(this))
+
+    // this.appendChild(tooltipIcon)
+    this.shadowRoot.appendChild(tooltipIcon)
+    // now it's appending to the shadow tree
+
+    // add styles - to the t5e-tooltip el itself
+    this.style.position = 'relative'
+  }
+
+  _showTooltip() {
+    this._tooltipContainer = document.createElement('div')
+    this._tooltipContainer.textContent = this._tooltipText
+    // add styles
+    this._tooltipContainer.style.backgroundColor = 'black'
+    this._tooltipContainer.style.color = 'white'
+    this._tooltipContainer.style.position = 'absolute'
+    this._tooltipContainer.style.zIndex = '10'
+
+    this.shadowRoot.appendChild(this._tooltipContainer)
+  }
+
+  _hideTooltip() {
+    this.shadowRoot.removeChild(this._tooltipContainer)
+  }
+}
+
+customElements.define('t5e-tooltip', Tooltip)
+```
+
+in index.html:
+
+```html
+<p><t5e-tooltip text="Web components are a set of standards that allow you to create custom elements from existing elements. 🔥">Web components</t5e-tooltip> rock!</p>
+<t5e-tooltip></t5e-tooltip>
+```
